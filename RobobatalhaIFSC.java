@@ -15,8 +15,16 @@ public class RobobatalhaIFSC extends AdvancedRobot {
 
         while (true) {
             setTurnRadarRight(360);
-            setAhead(andandoFrente ? 100 : -100);
+
+            // Movimento imprevisível
+            if (Math.random() < 0.05) {
+                setTurnRight(90 - Math.random() * 180);
+                andandoFrente = !andandoFrente;
+            }
+
             evitarParede();
+            setAhead(andandoFrente ? 100 : -100);
+
             execute();
         }
     }
@@ -36,11 +44,26 @@ public class RobobatalhaIFSC extends AdvancedRobot {
     }
 
     private void evitarParede() {
-        double margem = 50;
-        if (getX() < margem || getX() > getBattleFieldWidth() - margem ||
-            getY() < margem || getY() > getBattleFieldHeight() - margem) {
-            setBack(100);
-            andandoFrente = !andandoFrente;
+        double margem = 60;
+        double x = getX();
+        double y = getY();
+        double largura = getBattleFieldWidth();
+        double altura = getBattleFieldHeight();
+
+        if (x < margem) {
+            setTurnRight(0); // virar para a direita
+            andandoFrente = true;
+        } else if (x > largura - margem) {
+            setTurnRight(180); // virar para a esquerda
+            andandoFrente = true;
+        }
+
+        if (y < margem) {
+            setTurnRight(90); // virar para cima
+            andandoFrente = true;
+        } else if (y > altura - margem) {
+            setTurnRight(-90); // virar para baixo
+            andandoFrente = true;
         }
     }
 }
