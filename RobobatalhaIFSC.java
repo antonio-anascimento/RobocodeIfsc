@@ -23,10 +23,10 @@ public class RobobatalhaIFSC extends Robot
 		// Robot main loop
 		while(true) {
 			// Replace the next 4 lines with any behavior you would like
-			ahead(100);
-			turnGunRight(360);
-			back(100);
-			turnGunRight(360);
+			ahead(120);        //anda 120 pixels à frente
+			turnGunRight(360); //gira o canhão 360 graus
+			back(120);         //anda 100 pixels para trás
+			turnGunRight(360); //gira o canhão novamente 
 		}
 	}
 
@@ -35,7 +35,7 @@ public class RobobatalhaIFSC extends Robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
 		// Replace the next line with any behavior you would like
-		fire(1);
+		fire(1); //atira com potência 1-pouca força mas rápido
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class RobobatalhaIFSC extends Robot
 	 */
 	public void onHitByBullet(HitByBulletEvent e) {
 		// Replace the next line with any behavior you would like
-		back(10);
+		back(10); //recua um pouco quando é atingido
 	}
 	
 	/**
@@ -51,7 +51,6 @@ public class RobobatalhaIFSC extends Robot
 	 */
 	public void onHitWall(HitWallEvent e) {
 		// Replace the next line with any behavior you would like
-		back(20);
+		back(20); //quando colide na parede apenas dá um recuo
 	}	
 }
-
