@@ -22,7 +22,7 @@ public class RobobatalhaIFSC extends Robot
 
 		// Robot main loop
 		while(true) {
-			// Replace the next 4 lines with any behavior you would like
+			// Replace the next 4 lines with any behavior you wod like
 			ahead(100);
 			turnGunRight(360);
 			back(100);
@@ -34,8 +34,24 @@ public class RobobatalhaIFSC extends Robot
 	 * onScannedRobot: What to do when you see another robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
-		// Replace the next line with any behavior you would like
-		fire(1);
+		// Trava o radar no inimigo
+		double radarTurn = getHeading() + e.getBearing() - getRadarHeading();
+		turnRadarRight(normalizeBearing(radarTurn));
+
+		// Mira e atira (temporário)
+		double absoluteBearing = getHeading() + e.getBearing();
+		double gunTurn = normalizeBearing(absoluteBearing - getGunHeading());
+		turnGunRight(gunTurn);
+
+		if (Math.abs(gunTurn) < 10) {
+			fire(2);
+		}
+	}
+
+	public double normalizeBearing(double angle) {
+		while (angle > 180) angle -= 360;
+		while (angle < -180) angle += 360;
+		return angle;
 	}
 
 	/**
@@ -54,4 +70,3 @@ public class RobobatalhaIFSC extends Robot
 		back(20);
 	}	
 }
-
