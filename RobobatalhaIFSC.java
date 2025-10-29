@@ -2,34 +2,36 @@ package roboifsc;
 
 import robocode.*;
 import java.awt.Color;
+import robocode.util.Utils; 
 
 public class RobobatalhaIFSC extends AdvancedRobot {
 
     double energiaAnterior = 100;
     boolean andandoFrente = true;
+    double margemParede = 60; 
 
     public void run() {
         setColors(Color.red, Color.blue, Color.blue);
         setAdjustGunForRobotTurn(true);
         setAdjustRadarForGunTurn(true);
 
+   
+        setTurnRadarRight(Double.POSITIVE_INFINITY); 
+
         while (true) {
-            setTurnRadarRight(360);
-
-            // Movimento imprevisível
-            if (Math.random() < 0.05) {
-                setTurnRight(90 - Math.random() * 180);
-                andandoFrente = !andandoFrente;
+            
+            if (estouPertoDaParede()) {
+                evitarParede();
+            } else {
+                movimentoAleatorio();
             }
-
-            evitarParede();
-            setAhead(andandoFrente ? 100 : -100);
 
             execute();
         }
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
+
         double quedaDeEnergia = energiaAnterior - e.getEnergy();
         energiaAnterior = e.getEnergy();
 
@@ -38,32 +40,52 @@ public class RobobatalhaIFSC extends AdvancedRobot {
             andandoFrente = !andandoFrente;
         }
 
-        double radarLock = getHeading() - getRadarHeading() + e.getBearing();
-        setTurnRadarRight(radarLock);
-        execute();
+        double absoluteBearing = getHeading() + e.getBearing();
+        double radarTurn = Utils.normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
+        
+        setTurnRadarRight(radarTurn);
+
+        setFire(2);
+
+    private boolean estouPertoDaParede() {
+        return (getX() < margemParede || getX() > getBattleFieldWidth() - margemParede ||
+                getY() < margemParede || getY() > getBattleFieldHeight() - margemParede);
+    }
+
+
+    private void movimentoAleatorio() {
+        if (Math.random() < 0.05) { 
+            setTurnRight(90 - Math.random() * 180);
+            andandoFrente = !andandoFrente; 
+        }
+
+        setAhead(andandoFrente ? 100 : -100);
     }
 
     private void evitarParede() {
-        double margem = 60;
         double x = getX();
         double y = getY();
-        double largura = getBattleFieldWidth();
-        double altura = getBattleFieldHeight();
+        
+        double anguloParaCentro = Math.atan2(getBattleFieldWidth() / 2 - x, getBattleFieldHeight() / 2 - y);
+        
 
-        if (x < margem) {
-            setTurnRight(0); // virar para a direita
-            andandoFrente = true;
-        } else if (x > largura - margem) {
-            setTurnRight(180); // virar para a esquerda
-            andandoFrente = true;
-        }
+        double turnAngle = Utils.normalRelativeAngleDegrees(Math.toDegrees(anguloParaCentro) - getHeading());
 
-        if (y < margem) {
-            setTurnRight(90); // virar para cima
-            andandoFrente = true;
-        } else if (y > altura - margem) {
-            setTurnRight(-90); // virar para baixo
-            andandoFrente = true;
-        }
+        setTurnRight(turnAngle);
+        andandoFrente = true;
+        setAhead(100);
+    }
+    
+    
+    @Override
+    public void onHitWall(HitWallEvent e) {
+        setBack(150);
+        setTurnRight(90);
+        andandoFrente = true;
+    }
+    
+    @Override
+    public void onHitByBullet(HitByBulletEvent e) {
+        setBack(50);
     }
 }
