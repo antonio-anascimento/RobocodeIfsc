@@ -52,11 +52,8 @@ public class HulkBuster extends AdvancedRobot {
         double inimigoY = minhaPos.y + e.getDistance() * Math.cos(absBearing);
 
         double bulletPower = escolherPotenciaTiro(e);
-<<<<<<< HEAD:RobobatalhaIFSC.java
+
         double bulletSpeed = 20 - 3 * bulletPower;
-=======
-        double bulletSpeed = 20 - 3 * bulletPower; 
->>>>>>> origin/main:HulkBuster.java
 
         double inimigoHeading = e.getHeadingRadians();
         double inimigoVel = e.getVelocity();
