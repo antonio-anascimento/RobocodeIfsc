@@ -19,8 +19,7 @@ public class RobobatalhaIFSC extends AdvancedRobot {
 
         setAdjustGunForRobotTurn(true);
         setAdjustRadarForGunTurn(true);
-
-        setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+		setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
 
         while (true) {
             if (estouPertoDaParede()) {
@@ -44,6 +43,7 @@ public class RobobatalhaIFSC extends AdvancedRobot {
 
         double absBearing = getHeadingRadians() + e.getBearingRadians();
         double radarTurn = Utils.normalRelativeAngle(absBearing - getRadarHeadingRadians());
+        
         setTurnRadarRightRadians(radarTurn * 2);
 
         Point2D.Double minhaPos = new Point2D.Double(getX(), getY());
@@ -52,7 +52,7 @@ public class RobobatalhaIFSC extends AdvancedRobot {
         double inimigoY = minhaPos.y + e.getDistance() * Math.cos(absBearing);
 
         double bulletPower = escolherPotenciaTiro(e);
-        double bulletSpeed = 20 - 3 * bulletPower; // regra do Robocode
+        double bulletSpeed = 20 - 3 * bulletPower;
 
         double inimigoHeading = e.getHeadingRadians();
         double inimigoVel = e.getVelocity();
@@ -149,4 +149,8 @@ public class RobobatalhaIFSC extends AdvancedRobot {
     private static double clamp(double v, double min, double max) {
         return Math.max(min, Math.min(max, v));
     }
+	
+	public void onRobotDeath(RobotDeathEvent e) {
+            setTurnRadarRight(360);
+        }
 }
