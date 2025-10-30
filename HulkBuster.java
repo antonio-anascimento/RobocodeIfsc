@@ -5,7 +5,7 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import robocode.util.Utils;
 
-public class RobobatalhaIFSC extends AdvancedRobot {
+public class HulkBuster extends AdvancedRobot {
 
     double energiaAnterior = 100;
     boolean andandoFrente = true;
@@ -15,7 +15,7 @@ public class RobobatalhaIFSC extends AdvancedRobot {
 
     @Override
     public void run() {
-        setColors(Color.red, Color.blue, Color.blue);
+        setColors(new Color(170, 0, 0), Color.yellow, Color.yellow);
 
         setAdjustGunForRobotTurn(true);
         setAdjustRadarForGunTurn(true);
@@ -52,7 +52,7 @@ public class RobobatalhaIFSC extends AdvancedRobot {
         double inimigoY = minhaPos.y + e.getDistance() * Math.cos(absBearing);
 
         double bulletPower = escolherPotenciaTiro(e);
-        double bulletSpeed = 20 - 3 * bulletPower; // regra do Robocode
+        double bulletSpeed = 20 - 3 * bulletPower; 
 
         double inimigoHeading = e.getHeadingRadians();
         double inimigoVel = e.getVelocity();
