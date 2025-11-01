@@ -19,7 +19,8 @@ public class HulkBuster extends AdvancedRobot {
 
         setAdjustGunForRobotTurn(true);
         setAdjustRadarForGunTurn(true);
-		setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+        // Este comando é a sua "busca padrão" do radar
+        setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
 
         while (true) {
             if (estouPertoDaParede()) {
@@ -44,6 +45,7 @@ public class HulkBuster extends AdvancedRobot {
         double absBearing = getHeadingRadians() + e.getBearingRadians();
         double radarTurn = Utils.normalRelativeAngle(absBearing - getRadarHeadingRadians());
         
+        // Este comando é a sua "trava" de radar. Ele SOBRESCREVE o giro infinito do run()
         setTurnRadarRightRadians(radarTurn * 2);
 
         Point2D.Double minhaPos = new Point2D.Double(getX(), getY());
@@ -134,24 +136,39 @@ public class HulkBuster extends AdvancedRobot {
         setAhead(120);
     }
 
+    // --- CORREÇÃO 1: REMOVIDO CONFLITO DE MOVIMENTO ---
     @Override
     public void onHitWall(HitWallEvent e) {
-        setBack(150);
-        setTurnRight(90);
-        andandoFrente = true;
+        // VAZIO.
+        // Deixar vazio evita conflito com a lógica "evitarParede()" do run().
+        // Isso impede que o robô trave na parede.
     }
 
+    // --- CORREÇÃO 2: LÓGICA DE AMEAÇA NO RADAR ---
     @Override
     public void onHitByBullet(HitByBulletEvent e) {
+        
+        // Só quebra a trava do radar se o tiro for FORTE (potência > 2.0)
+        // Isso sugere que o atirador está perto e é uma ameaça real.
+        if (e.getPower() > 2.0) {
+            // Quebra a trava e reativa a busca infinita do radar
+            setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+        }
+        // Se o tiro for fraco (<= 2.0), ele é ignorado e o robô
+        // continua focado no alvo original.
 
-        setBack(50);
+        // O comando "setBack(50)" foi removido para evitar conflito de movimento.
     }
 
     private static double clamp(double v, double min, double max) {
         return Math.max(min, Math.min(max, v));
     }
-	
-	public void onRobotDeath(RobotDeathEvent e) {
-            setTurnRadarRight(360);
+    
+    // --- CORREÇÃO 3: EVITAR TRAVA EM ROBÔ MORTO ---
+    @Override
+    public void onRobotDeath(RobotDeathEvent e) {
+            // Quebra a trava do radar e reativa a busca infinita
+            // para procurar o próximo alvo.
+            setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
         }
 }
