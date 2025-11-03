@@ -40,7 +40,7 @@ public class HulkBuster extends AdvancedRobot {
         if (quedaDeEnergia > 0 && quedaDeEnergia <= 3) {
             setTurnRight(e.getBearing() + (Math.random() > 0.5 ? 90 : -90));
             andandoFrente = !andandoFrente;
-            setAhead(andandoFrente ? 100 : -100);
+            setAhead(andandoFrente ? 120 : -120);
         }
 
         double absBearing = getHeadingRadians() + e.getBearingRadians();
@@ -55,6 +55,10 @@ public class HulkBuster extends AdvancedRobot {
         double inimigoY = minhaPos.y + e.getDistance() * Math.cos(absBearing);
 
         double bulletPower = escolherPotenciaTiro(e);
+        if (bulletPower == 0) { //em situações de energia muito baixa e inimigo longe, decide não atirar.
+
+            return;
+        }
 
         double bulletSpeed = 20 - 3 * bulletPower;
 
