@@ -85,7 +85,7 @@ public class HulkBuster extends AdvancedRobot {
         setTurnGunRightRadians(gunTurn);
 
         
-        if (getGunHeat() == 0 && Math.abs(gunTurn) < Math.toRadians(20)) {
+        if (getGunHeat() == 0 && Math.abs(gunTurn) < Math.toRadians(20) && getEnergy() > 0.5) {
             setFire(bulletPower);
         }
     }
