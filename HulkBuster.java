@@ -9,9 +9,10 @@ public class HulkBuster extends AdvancedRobot {
 
     double energiaAnterior = 100;
     boolean andandoFrente = true;
-    double margemParede = 60;
+    double margemParede = 40;
 
-    static final double WALL_MARGIN = 18;
+    static final double WALL_MARGIN = 40;
+    static final double MAX_PREDICTION_TIME = 2.5; //para limitar o tempo de predição para não "viajar" demais.
 
     @Override
     public void run() {
