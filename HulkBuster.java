@@ -4,6 +4,8 @@ import robocode.*;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import robocode.util.Utils;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
 
 public class HulkBuster extends AdvancedRobot {
 
@@ -12,8 +14,14 @@ public class HulkBuster extends AdvancedRobot {
     double margemParede = 40;
 
     static final double WALL_MARGIN = 40;
-    static final double MAX_PREDICTION_TIME = 2.5; //para limitar o tempo de predição para não "viajar" demais.
+    static final double MAX_PREDICTION_TIME = 2.5; //Para limitar o tempo de predição para não "viajar" demais.
 
+    //Laser: guarda a potência do último disparo para definir a cor do feixe de luz.
+    double ultimoBulletPower = 0;
+
+    //Laser: guarda a última distância até o inimido escaneado
+    double ultimaDistanciaInimigo = 0;
+    
     @Override
     public void run() {
         setColors(new Color(170, 0, 0), Color.yellow, Color.yellow);
@@ -54,11 +62,16 @@ public class HulkBuster extends AdvancedRobot {
         double inimigoX = minhaPos.x + e.getDistance() * Math.sin(absBearing);
         double inimigoY = minhaPos.y + e.getDistance() * Math.cos(absBearing);
 
+        ultimaDistanciaInimigo = e.getDistance(); //Grava a distância até o inimigo para ajustar o feixe de laser.
+        
         double bulletPower = escolherPotenciaTiro(e);
         if (bulletPower == 0) { //em situações de energia muito baixa e inimigo longe, decide não atirar.
 
             return;
         }
+
+        //Laser: guarda a potência atual para desenhar o laser com a cor correspondente.
+        ultimoBulletPower = bulletPower;
 
         double bulletSpeed = 20 - 3 * bulletPower;
 
@@ -90,7 +103,7 @@ public class HulkBuster extends AdvancedRobot {
         setTurnGunRightRadians(gunTurn);
 
         
-        if (getGunHeat() == 0 && Math.abs(gunTurn) < Math.toRadians(20) && getEnergy() > 0.5) {
+        if (getGunHeat() <= 0 && Math.abs(gunTurn) < Math.toRadians(20) && getEnergy() > 0.5) {
             setFire(bulletPower);
         }
     }
@@ -176,4 +189,81 @@ public class HulkBuster extends AdvancedRobot {
             // para procurar o próximo alvo.
             setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
         }
+
+        //Laser - feixe de luz duplo piscando + comprimento pela distância
+        //*aparece somente quando o canhão está pronto (gunHeat<=0)
+        //*pisca conforme getTime()
+        //*cor depende do ultimoBulletPower
+        //*comprimento depende de ultimaDistanciaInimigo
+
+        @Override
+        public void onPaint(Graphics2D g) {
+        //Se o canhão ainda está esquentando, não desenha o laser
+        if (getGunHeat() > 0) {
+            return;
+        }
+
+        //Efeito pisca-pisca: metade do tempo não desenha nada
+        //Ajuste para deixar mais rápido (8 menor) ou mais lento (8 maior)
+        long t = getTime();
+        if (t % 8 < 4) {
+            return;
+        }
+
+        //Cor do feixe conforme potência do último tiro
+        if (ultimoBulletPower >= 2.5) {
+            g.setColor(Color.RED);           //tiros fortes = vermelho
+        } else if (ultimoBulletPower >= 1.5) {
+            g.setColor(Color.ORANGE);        //tiros médios = laranja
+        } else if (ultimoBulletPower > 0) {
+            g.setColor(Color.GREEN);         //tiros fracos = verde
+        } else {
+            g.setColor(Color.GRAY);          //ainda não atirou
+        }
+
+        double x = getX();
+        double y = getY();
+
+        //Definindo intervalo de distâncias
+        double minDist = 100; //muito perto
+        double maxDist = 800; //bem longe
+
+        //Intervalo de comprimento do feixe
+        double minLen = 150;
+        double maxLen = 1000;
+
+        double d = ultimaDistanciaInimigo;
+
+        //Se ainda não tem distância inicial, usa valor intermediário
+        if (d <=0) {
+            d = (minDist + maxDist) / 2.0;
+        }
+
+        //Clampa a distância no intervalo min e max
+        d = Math.max(minDist, Math.min(maxDist, d));
+
+        //Normaliza para [0, 1]
+        double norm = (d - minDist) / (maxDist - minDist);
+
+        // Calcula comprimento principal: perto -> menor, longe -> maior
+        double comprimentoFeixePrincipal  = minLen + norm * (maxLen - minLen);
+        double comprimentoFeixeSecundario = comprimentoFeixePrincipal * 0.7; // secundário um pouco menor
+
+        //Fim do feixe principal
+        double endX1 = x + Math.sin(getGunHeadingRadians()) * comprimentoFeixePrincipal;
+        double endY1 = y + Math.cos(getGunHeadingRadians()) * comprimentoFeixePrincipal;
+
+        //Fim do feixe secundário
+        double endX2 = x + Math.sin(getGunHeadingRadians()) * comprimentoFeixeSecundario;
+        double endY2 = y + Math.cos(getGunHeadingRadians()) * comprimentoFeixeSecundario;
+
+        //Feixe principal: mais grosso
+        g.setStroke(new BasicStroke(2.5f));
+        g.drawLine((int) x, (int) y, (int) endX1, (int) endY1);
+
+        //Feixe secundário: mais fino e com brilho
+        g.setStroke(new BasicStroke(1.0f));
+        g.setColor(new Color(255, 255, 150)); // amarelo claro
+        g.drawLine((int) x, (int) y, (int) endX2, (int) endY2);
+    }
 }
